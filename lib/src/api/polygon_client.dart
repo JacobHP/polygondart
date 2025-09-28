@@ -6,11 +6,9 @@ import '../models/models.dart';
 
 class PolygonClient {
   final ApiConfig config;
-  final http.Client httpClient;
   // logger?
 
-  PolygonClient({required this.config, http.Client? httpClient})
-    : httpClient = httpClient ?? http.Client();
+  PolygonClient({required this.config});
 
   // make it a list of Option
   Future<List<Option>> fetchOptionsChain({
@@ -25,7 +23,7 @@ class PolygonClient {
 
     print("Fetching from $uri");
 
-    final response = await httpClient.get(uri);
+    final response = await http.get(uri);
     print("Response: $response");
 
     if (response.statusCode == 200) {
