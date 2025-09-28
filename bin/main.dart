@@ -3,9 +3,11 @@ import 'package:args/args.dart';
 import 'package:dotenv/dotenv.dart';
 
 import 'package:polygondart/polygondart.dart' as polygondart;
+import 'package:polygondart/src/api/config.dart';
+import 'package:polygondart/src/api/polygon_client.dart';
 
 // entry with a ticker and expiration date to get the options chain
-void main(List<String> arguments) {
+void main(List<String> arguments) async {
   final parser = ArgParser()
     ..addOption(
       'ticker',
@@ -54,7 +56,14 @@ void main(List<String> arguments) {
     print(
       'Fetching options data for ticker: $ticker and expiration $expiration',
     );
-    print('Not yet implemented');
+    final config = ApiConfig(apiKey: apiKey);
+    final client = PolygonClient(config: config);
+
+    final options = await client.fetchOptionsChain(
+      ticker: ticker,
+      expirationDate: expiration,
+    );
+    print("Fetched options ${options.take(3)}...");
   } catch (e) {
     print('Error: $e');
     exit(1);
