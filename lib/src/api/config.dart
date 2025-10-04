@@ -1,7 +1,12 @@
 class ApiConfig {
   static const String baseUrl = 'https://api.polygon.io';
-  static const String optionsEndpoint = '/v3/reference/options/contracts';
-  static const String optionDetailsEndpoint = '/v3/snapshot/options/contracts';
+  static const String optionsReferenceBaseEndpoint = '/v3/reference/options';
+  static const String optionsEndpoint =
+      '$optionsReferenceBaseEndpoint/contracts';
+  static const String optionsSnapshotBaseEndpoint = '/v3/snapshot/options';
+  static const String optionsDailyTickerEndpoint = '/v1/open-close';
+
+  // static const String optionDetailsEndpoint = '/v3/snapshot/options/contracts';
 
   final String apiKey;
 
@@ -23,6 +28,38 @@ class ApiConfig {
 
     return Uri.parse(
       baseUrl + optionsEndpoint,
+    ).replace(queryParameters: params);
+  }
+
+  Uri buildOptionsChainUrl({
+    required String ticker,
+    String? expirationDate,
+    int limit = 250, // max
+    String? sort,
+  }) {
+    final params = {
+      'apiKey': apiKey,
+      'limit': limit.toString(),
+      if (expirationDate != null) 'expiration_date': expirationDate,
+      // Can also do
+      // if (expirationDateGte != null) 'expiration_date.gte': expirationDateG
+      if (sort != null) 'sort': sort,
+    };
+
+    return Uri.parse(
+      "$baseUrl$optionsSnapshotBaseEndpoint/$ticker",
+    ).replace(queryParameters: params);
+  }
+
+  Uri buildOptionsDailyTickerUrl({
+    required String optionTicker,
+    required String date,
+    bool? adjusted = true,
+  }) {
+    final params = {'apiKey': apiKey, 'adjusted': adjusted.toString()};
+    // final encodedTicker = Uri.encodeComponent(optionTicker);
+    return Uri.parse(
+      "$baseUrl$optionsDailyTickerEndpoint/$optionTicker/$date",
     ).replace(queryParameters: params);
   }
 }
