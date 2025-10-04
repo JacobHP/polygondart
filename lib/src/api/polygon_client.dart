@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import 'config.dart';
 import '../models/models.dart';
+import '../utils/logger.dart';
 
 class PolygonClient {
   final ApiConfig config;
@@ -22,10 +23,10 @@ class PolygonClient {
       expirationDate: expirationDate,
     );
 
-    print("Fetching from $uri");
+    logger.fine("Fetching from $uri");
 
     final response = await http.get(uri);
-    print("Response: $response");
+    logger.fine("Response: $response");
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -39,6 +40,9 @@ class PolygonClient {
     }
   }
 
+  void
+  fetchOptionsContractOverview() {} // https://polygon.io/docs/rest/options/contracts/contract-overview
+
   Future<Map<String, dynamic>> fetchDailyTickerPrice({
     required String ticker,
     required String date,
@@ -50,10 +54,10 @@ class PolygonClient {
       adjusted: adjusted,
     );
 
-    print("Fetching from $uri");
+    logger.fine("Fetching from $uri");
 
     final response = await http.get(uri);
-    print("Response: $response");
+    logger.fine("Response: $response");
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -64,10 +68,18 @@ class PolygonClient {
       );
     }
   }
+
+  void
+  fetchPrevDailyTickerPrice() {} // prev available https://polygon.io/docs/rest/options/aggregates/previous-day-bar
+  // good for options
+
+  void
+  fetchBarsTickerPrice() {} // prices ina  range and multiplier https://polygon.io/docs/rest/options/aggregates/custom-bars
 }
 
 void main() async {
-  print('Testing client...');
+  setUpLogger();
+  logger.info('Testing client...');
   final env = DotEnv(includePlatformEnvironment: true)..load();
   final apiKey = env['POLYGON_API_KEY'] as String;
   final config = ApiConfig(apiKey: apiKey);
@@ -78,5 +90,6 @@ void main() async {
     ticker: 'AAPL',
     date: '2025-10-02',
   );
-  print('Options fetched: $options');
+  print('Done');
+  logger.info('Options fetched: $options');
 }
