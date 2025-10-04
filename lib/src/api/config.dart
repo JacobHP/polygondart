@@ -7,7 +7,7 @@ class ApiConfig {
 
   ApiConfig({required this.apiKey});
 
-  Uri buildOptionsChainUrl({
+  Uri buildOptionsContractUrl({
     required String ticker,
     String? expirationDate,
     int limit = 1000,

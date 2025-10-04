@@ -11,12 +11,12 @@ class PolygonClient {
   PolygonClient({required this.config});
 
   // make it a list of Option
-  Future<List<Option>> fetchOptionsChain({
+  Future<List<Option>> fetchOptionsContracts({
     required String ticker,
     required String expirationDate,
     int? limit,
   }) async {
-    final uri = config.buildOptionsChainUrl(
+    final uri = config.buildOptionsContractUrl(
       ticker: ticker,
       expirationDate: expirationDate,
     );
@@ -45,7 +45,7 @@ void main() async {
   final config = ApiConfig(apiKey: 'foobar');
   final client = PolygonClient(config: config);
 
-  final options = await client.fetchOptionsChain(
+  final options = await client.fetchOptionsContracts(
     ticker: 'AAPL',
     expirationDate: '2025-10-03',
   );

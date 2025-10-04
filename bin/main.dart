@@ -59,7 +59,7 @@ void main(List<String> arguments) async {
     final config = ApiConfig(apiKey: apiKey);
     final client = PolygonClient(config: config);
 
-    final options = await client.fetchOptionsChain(
+    final options = await client.fetchOptionsContracts(
       ticker: ticker,
       expirationDate: expiration,
     );
