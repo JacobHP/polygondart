@@ -4,7 +4,7 @@ class ApiConfig {
   static const String optionsEndpoint =
       '$optionsReferenceBaseEndpoint/contracts';
   static const String optionsSnapshotBaseEndpoint = '/v3/snapshot/options';
-  static const String optionsDailyTickerEndpoint = '/v1/open-close';
+  static const String dailyTickerEndpoint = '/v1/open-close';
 
   // static const String optionDetailsEndpoint = '/v3/snapshot/options/contracts';
 
@@ -51,15 +51,15 @@ class ApiConfig {
     ).replace(queryParameters: params);
   }
 
-  Uri buildOptionsDailyTickerUrl({
-    required String optionTicker,
+  Uri buildDailyTickerPriceUrl({
+    required String ticker,
     required String date,
     bool? adjusted = true,
   }) {
     final params = {'apiKey': apiKey, 'adjusted': adjusted.toString()};
     // final encodedTicker = Uri.encodeComponent(optionTicker);
     return Uri.parse(
-      "$baseUrl$optionsDailyTickerEndpoint/$optionTicker/$date",
+      "$baseUrl$dailyTickerEndpoint/$ticker/$date",
     ).replace(queryParameters: params);
   }
 }

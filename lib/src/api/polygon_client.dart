@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dotenv/dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import 'config.dart';
@@ -9,13 +10,6 @@ class PolygonClient {
   // logger?
 
   PolygonClient({required this.config});
-
-  // Future<Map<String, dynamic>>
-  void fetchTickerDailyPrice({
-    required String ticker,
-    required String date,
-    bool? adjusted = true,
-  }) async {}
 
   // make it a list of Option
   Future<List<Option>> fetchOptionsContracts({
@@ -45,13 +39,13 @@ class PolygonClient {
     }
   }
 
-  Future<Map<String, dynamic>> fetchOptionsDailyPrice({
-    required String optionTicker,
+  Future<Map<String, dynamic>> fetchDailyTickerPrice({
+    required String ticker,
     required String date,
     bool? adjusted = true,
   }) async {
-    final uri = config.buildOptionsDailyTickerUrl(
-      optionTicker: optionTicker,
+    final uri = config.buildDailyTickerPriceUrl(
+      ticker: ticker,
       date: date,
       adjusted: adjusted,
     );
@@ -74,12 +68,14 @@ class PolygonClient {
 
 void main() async {
   print('Testing client...');
-
-  final config = ApiConfig(apiKey: 'foobar');
+  final env = DotEnv(includePlatformEnvironment: true)..load();
+  final apiKey = env['POLYGON_API_KEY'] as String;
+  final config = ApiConfig(apiKey: apiKey);
   final client = PolygonClient(config: config);
 
-  final options = await client.fetchOptionsDailyPrice(
-    optionTicker: 'O:AAPL251010C00257500',
+  final options = await client.fetchDailyTickerPrice(
+    // ticker: 'O:AAPL251010C00257500',
+    ticker: 'AAPL',
     date: '2025-10-02',
   );
   print('Options fetched: $options');
