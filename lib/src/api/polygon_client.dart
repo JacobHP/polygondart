@@ -99,8 +99,13 @@ class PolygonClient {
         .toList();
   }
 
-  void
-  fetchOptionsContractOverview() {} // https://polygon.io/docs/rest/options/contracts/contract-overview
+  Future<Map<String, dynamic>> fetchOptionsContractOverview({
+    required String ticker,
+  }) async {
+    final uri = config.buildOptionContractUri(ticker: ticker);
+    final data = await _makeGetRequest(uri);
+    return data;
+  } // https://polygon.io/docs/rest/options/contracts/contract-overview
 
   Future<Map<String, dynamic>> fetchDailyTickerPrice({
     required String ticker,
@@ -116,12 +121,63 @@ class PolygonClient {
     return data;
   }
 
-  void
-  fetchPrevDailyTickerPrice() {} // prev available https://polygon.io/docs/rest/options/aggregates/previous-day-bar
+  Future<Map<String, dynamic>> fetchPrevDailyTickerPrice({
+    required String ticker,
+    bool? adjusted = true,
+  }) async {
+    final uri = config.buildTickerPrevUri(ticker: ticker, adjusted: adjusted);
+    final data = await _makeGetRequest(uri);
+    return data;
+  } // prev available https://polygon.io/docs/rest/options/aggregates/previous-day-bar
   // good for options
 
-  void
-  fetchBarsTickerPrice() {} // prices ina  range and multiplier https://polygon.io/docs/rest/options/aggregates/custom-bars
+  Future<List<Map<String, dynamic>>> fetchBarsTickerPrice({
+    required String ticker,
+    required int multiplier,
+    required String timespan, // make this an Enum
+    required String fromDate,
+    required String toDate,
+    bool? adjusted = true,
+    String? sort = 'asc',
+    int? pageLimit = 5000,
+  }) async {
+    List<Map<String, dynamic>> allResults = [];
+
+    Uri? currentUri = config.buildCustomBarsUri(
+      ticker: ticker,
+      multiplier: multiplier,
+      timespan: timespan,
+      from: fromDate,
+      to: toDate,
+      adjusted: adjusted,
+      sort: sort,
+      limit: pageLimit,
+    );
+
+    while (currentUri != null) {
+      logger.fine("Fetching page from ${_sanitizeUri(currentUri)}");
+
+      final data = await _makeGetRequest(currentUri);
+      final results = data['results'] as List<dynamic>? ?? [];
+      allResults.addAll(results.cast<Map<String, dynamic>>());
+      logger.info(
+        "Fetched ${results.length} bars (total: ${allResults.length})",
+      );
+
+      final nextUrl = data['next_url'] as String?;
+      currentUri = nextUrl != null
+          ? Uri.parse(nextUrl).replace(
+              queryParameters: {
+                ...Uri.parse(nextUrl).queryParameters,
+                'apiKey': config.apiKey,
+              },
+            )
+          : null;
+    }
+
+    logger.info("Finished fetching all bars: ${allResults.length} total");
+    return allResults;
+  } // prices ina  range and multiplier https://polygon.io/docs/rest/options/aggregates/custom-bars
 }
 
 void main() async {
@@ -132,10 +188,15 @@ void main() async {
   final config = ApiConfig(apiKey: apiKey);
   final client = PolygonClient(config: config);
 
-  final options = await client.fetchDailyTickerPrice(
+  final options = await client.fetchBarsTickerPrice(
     // ticker: 'O:AAPL251010C00257500',
+    multiplier: 1,
+    timespan: "day",
+    fromDate: "2025-01-09",
+    toDate: "2025-02-10",
+    pageLimit: 10,
     ticker: 'AAPL',
-    date: '2025-10-05',
+    // date: '2025-10-05',
   );
   print('Done');
   logger.info('Options fetched: $options');
